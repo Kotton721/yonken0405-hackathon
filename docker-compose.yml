@@ -1,0 +1,43 @@
+services:
+  yonken0405-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile  # 小文字で統一、インデントを正しく
+    container_name: yonken0405-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NVIDIA_VISIBLE_DEVICES=all
+    restart: always
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+
+  yonken0405-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile  # 小文字で統一、インデントを正しく
+    container_name: yonken0405-frontend
+    tty : true
+    ports:
+    #ローカルのポートをコンテナのポートにマッピング
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_SERVER_HOST=0.0.0.0
+    restart: always
+    depends_on:
+      - yonken0405-backend
+
+networks:
+  app-network:  # ネットワークを定義
+    driver: bridge

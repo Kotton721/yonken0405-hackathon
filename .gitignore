@@ -1,0 +1,28 @@
+# Python / FastAPI 関連
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+*.log
+
+# Node.js / Vite + React 関連
+node_modules/
+dist/
+*.log
+*.log.*
+
+# Docker 関連
+*.dockerignore
+Dockerfile.*
+*.tar.gz
+
+# その他一般的なもの
+*.DS_Store
+*.idea/
+*.vscode/
+*.swp

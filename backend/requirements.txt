@@ -1,0 +1,7 @@
+fastapi[all]
+uvicorn
+pillow
+torch==2.1.2
+torchvision==0.16.2
+
+

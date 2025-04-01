@@ -26,3 +26,6 @@ Dockerfile.*
 *.idea/
 *.vscode/
 *.swp
+
+#データベースはgitしない
+db_data/

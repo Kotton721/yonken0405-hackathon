@@ -19,6 +19,32 @@ services:
           devices:
             - driver: nvidia
               capabilities: [gpu]
+    depends_on:
+      - db
+
+  db:  # データベースの設定
+    image: postgres:latest  # PostgreSQLの最新イメージを使用
+    container_name: yonken0405-db  # コンテナ名
+    environment:
+      - POSTGRES_USER=user  # データベースのユーザー名
+      - POSTGRES_PASSWORD=password  # データベースのパスワード
+      - POSTGRES_DB=yonken0405-db  # データベース名
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # PostgreSQLのポートを公開
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: yonken0405-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: yonken0405@admin.com  # 管理者用のメールアドレス
+      PGADMIN_DEFAULT_PASSWORD: yonken0405  # 管理者用のパスワード
+    ports:
+      - "8080:80"  # pgAdminのポート
+    depends_on:
+      - db  # dbコンテナが起動してからpgAdminを起動
+
 
   yonken0405-frontend:
     build:

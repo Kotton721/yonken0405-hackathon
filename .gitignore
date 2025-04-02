@@ -30,3 +30,4 @@ Dockerfile.*
 #データベースはgitしない
 db_data/
 frontend/
+

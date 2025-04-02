@@ -55,7 +55,9 @@ WORKDIR /app
 # 必要な Python ライブラリを requirements.txt からインストール
 COPY ../requirements.txt /app/
 RUN pip3 install --no-cache-dir -r requirements.txt
-
+#データベースと通信するパッケージ
+RUN pip install sqlalchemy
+RUN pip install psycopg2-binary
 #クラッシュしないnumpyに変更(gradedown)
 RUN pip install "numpy<2"
 # アプリケーションコードをコンテナにコピー

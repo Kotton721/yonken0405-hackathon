@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import text
 from database import engine, Base, SessionLocal
-from db_models import MajorMuscle, MinorMuscle,TrainingName,TrainingScore,TrainingType
+from db_models import MajorMuscle, MinorMuscle,TrainingName,TrainingScore,TrainingType,WeightRatio
 
 # データ追加
 def add_data():
@@ -154,6 +154,7 @@ def add_data():
             else:
                 print(f"Training name not found: {training_name}")
 
+        
         try:
             db.add_all(training_scores)
             db.commit()
@@ -162,10 +163,50 @@ def add_data():
             db.rollback()
             print(f"トレーニングスコアの追加に失敗しました: {e}")
             raise
+        weight_ratios = [
+            # 胸 (Chest)
+            WeightRatio(training_name_id=1, weight_recommend=0.8),
+            WeightRatio(training_name_id=2, weight_recommend=0.7),
+            WeightRatio(training_name_id=3, weight_recommend=0.95),
+            WeightRatio(training_name_id=4, weight_recommend=0.85),
+            WeightRatio(training_name_id=5, weight_recommend=0.4),
+            WeightRatio(training_name_id=6, weight_recommend=1.2),
+            WeightRatio(training_name_id=7, weight_recommend=1.2),
 
+            # 背中 (Back)
+            WeightRatio(training_name_id=8, weight_recommend=0.85),
+            WeightRatio(training_name_id=9, weight_recommend=0.85),
+            WeightRatio(training_name_id=10, weight_recommend=1.3),
+            WeightRatio(training_name_id=11, weight_recommend=0.5),
+            WeightRatio(training_name_id=12, weight_recommend=1.1),
+            WeightRatio(training_name_id=13, weight_recommend=1.1),
 
+            # 肩 (Shoulders)
+            WeightRatio(training_name_id=14, weight_recommend=0.8),
+            WeightRatio(training_name_id=15, weight_recommend=0.8),
+            WeightRatio(training_name_id=16, weight_recommend=0.2),
+            WeightRatio(training_name_id=17, weight_recommend=1.25),
 
+            # 腕 (Arms)
+            WeightRatio(training_name_id=18, weight_recommend=0.7),
+            WeightRatio(training_name_id=19, weight_recommend=0.4),
+            WeightRatio(training_name_id=20, weight_recommend=0.55),
+            WeightRatio(training_name_id=21, weight_recommend=0.3),
+            WeightRatio(training_name_id=22, weight_recommend=0.3),
+            WeightRatio(training_name_id=23, weight_recommend=0.5),
+            WeightRatio(training_name_id=24, weight_recommend=0.5),
 
+            # 脚 (Legs)
+            WeightRatio(training_name_id=25, weight_recommend=1.4),
+            WeightRatio(training_name_id=26, weight_recommend=1),
+            WeightRatio(training_name_id=27, weight_recommend=0.75),
+            WeightRatio(training_name_id=28, weight_recommend=1.5),
+            WeightRatio(training_name_id=29, weight_recommend=1.25),
+            WeightRatio(training_name_id=30, weight_recommend=1.3),
+        ]
+        db.add_all(weight_ratios)
+        db.commit()
+        print("体重比率が挿入されました")
         return major_muscles
     except Exception as e:
         db.rollback()

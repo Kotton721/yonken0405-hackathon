@@ -1,8 +1,8 @@
 import psycopg2
 
 # データベース接続情報
-host = "db"  # もしコンテナで動いている場合はコンテナ名（例: db）
-dbname = "yonken0405-db"  # データベース名を"training"に設定
+host = "db"  # コンテナ名（例: db）
+dbname = "yonken0405-db"  # データベース名
 user = "user"
 password = "password"
 
@@ -14,38 +14,29 @@ conn = psycopg2.connect(
     password=password
 )
 
-training_name_id = 1  # 例えば1を指定
-
-# SQLクエリ
+# SQLクエリ: weight_ratios と training_names を結合して取得
 query = """
-SELECT minor_muscle_id, muscle_score
-FROM training_scores
-WHERE training_name_id = %s;
+SELECT wr.training_name_id, wr.weight_recommend, tn.name
+FROM weight_ratios wr
+JOIN training_names tn ON wr.training_name_id = tn.id;
 """
 
-# カーソルを作成してクエリを実行
+# カーソルを作成
 cursor = conn.cursor()
 
-# SQLクエリを実行して結果を取得
-cursor.execute(query, (training_name_id,))
+# クエリを実行して結果を取得
+cursor.execute(query)
 
 # 結果を取得
 rows = cursor.fetchall()
 
-# minor_muscle_nameを取得するクエリ
-minor_muscle_query = "SELECT name FROM minor_muscles WHERE id = %s;"
-
 # 結果を表示
+print("トレーニングごとの推奨重量比:")
 for row in rows:
-    minor_muscle_id = row[0]
-    muscle_score = row[1]
-
-    # minor_muscle_nameを取得
-    cursor.execute(minor_muscle_query, (minor_muscle_id,))
-    minor_muscle_name = cursor.fetchone()[0]
-
-    # 出力
-    print(f"minor_muscle_name: {minor_muscle_name}, muscle_score: {muscle_score}")
+    training_name_id = row[0]
+    weight_recommend = row[1]
+    training_name = row[2]
+    print(f"Training Name: {training_name}, Weight Recommend: {weight_recommend} (training_name_id: {training_name_id})")
 
 # 接続を閉じる
 cursor.close()

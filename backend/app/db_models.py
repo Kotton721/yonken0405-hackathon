@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey,Float
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -50,6 +50,8 @@ class TrainingName(Base):
 
     scores = relationship("TrainingScore", back_populates="training_name")
 
+    weight_ratios = relationship("WeightRatio", back_populates="training_name")
+
 
 # トレーニングとスコアを保持するテーブル
 class TrainingScore(Base):
@@ -63,3 +65,16 @@ class TrainingScore(Base):
     # リレーション
     training_name = relationship("TrainingName", back_populates="scores")
     minor_muscle = relationship("MinorMuscle", back_populates="scores")
+
+class WeightRatio(Base):
+    __tablename__ = "weight_ratios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    training_name_id = Column(Integer, ForeignKey("training_names.id"), nullable=False, index=True)
+    weight_recommend = Column(Float, nullable=False)  # 推奨重量比（例: 1.5）
+
+    training_name = relationship("TrainingName", back_populates="weight_ratios")
+
+
+
+    

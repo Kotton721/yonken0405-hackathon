@@ -1,3 +1,4 @@
+# これたぶんつかってない
 from database import SessionLocal
 from kano import calculate_total_training_score, save_daily_summary
 

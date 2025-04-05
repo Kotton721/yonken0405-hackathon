@@ -4,8 +4,8 @@ from datetime import datetime
 
 #ローカルでpythonとして実行するときはapp.が必要がないが，uvicornで実行するときベースのdirectoryがapp/appの上の階層
 
-# from database import Base
-from app.database import Base
+
+from database import Base
 
 # 大筋群
 class MajorMuscle(Base):

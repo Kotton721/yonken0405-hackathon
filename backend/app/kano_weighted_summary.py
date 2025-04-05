@@ -38,3 +38,28 @@ def calculate_weighted_muscle_scores():
 
 if __name__ == "__main__":
     calculate_weighted_muscle_scores()
+
+
+def get_weighted_muscle_scores():
+    db = SessionLocal()
+    try:
+        records = db.query(DailyMuscleSummary).order_by(DailyMuscleSummary.day_label.desc()).all()
+        day_groups = defaultdict(list)
+        for r in records:
+            day_groups[r.day_label].append(r)
+
+        sorted_days = sorted(day_groups.keys())[-7:]
+        weights = [0.3 + 0.1 * i for i in range(len(sorted_days))]
+
+        muscle_scores = defaultdict(float)
+
+        for day_idx, day_label in enumerate(sorted_days):
+            weight = weights[day_idx]
+            for r in day_groups[day_label]:
+                muscle_scores[r.major_muscle_name] += r.total_score * weight
+
+        return muscle_scores  # ← print ではなく返す
+    finally:
+        db.close()
+
+

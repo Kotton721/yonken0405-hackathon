@@ -3,8 +3,8 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, query
 
-from users.models import Base
-from database import get_db, SessionLocal
+from app.users.models import Base
+from app.database import get_db, SessionLocal
 
 ModelType = TypeVar("ModelType", bound=Base)
 

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from database import get_db
-from users.models import User, Train_History
-from users.schema import (
+from app.database import get_db
+from app.users.models import User, Train_History
+from app.users.schema import (
     UserCreate, UserRead,
     TrainHistoryCreate, TrainHistoryRead
 )

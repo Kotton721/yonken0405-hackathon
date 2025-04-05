@@ -1,5 +1,5 @@
 from crud import BaseCRUD
-from users.models import User
+from app.users.models import User
 
 
 class CRUDUser(BaseCRUD):

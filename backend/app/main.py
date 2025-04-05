@@ -1,7 +1,7 @@
 import shutil
 import os
 import logging
-from fastapi import FastAPI, File, UploadFile,Depends,HTTPException
+from fastapi import FastAPI, File, UploadFile,Depends,HTTPException,APIRouter
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
@@ -15,11 +15,15 @@ from app.database import get_db
 from app.db_models import TrainingName,MajorMuscle,TrainingLog
 from app.schema import TrainingNameSchema,MajorMuscleSchema,TrainingData
 
+from app.users.router import router
+from app.users.schema import UserRead,UserCreate
+
 # ロギング設定
 logging.basicConfig(filename='app.log', level=logging.INFO)  # ログレベルはINFOに設定
 logger = logging.getLogger(__name__)  # ロガーを作成
 
 app = FastAPI()
+
 
 # CORSの設定
 app.add_middleware(
@@ -76,5 +80,27 @@ async def save_training(data: TrainingData, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error saving training data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred while saving data: {str(e)}")
+
+
+@router.post("/users", response_model=UserRead)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    # 受け取ったusernameが既に存在するか確認
+    existing_user = db.query(User).filter(User.username == user.username).first()
+    if existing_user:
+        logger.warning(f"Username '{user.username}' already exists.")  # 警告ログ
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    # 新しいユーザーを作成
+    db_user = User(**user.dict())  # UserCreateスキーマからデータを受け取り
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
+    logger.info(f"User '{db_user.username}' created successfully.")  # 成功ログ
+
+    return db_user
+
+
+
 # users関連のAPIルーターを登録
-app.include_router(users_router, prefix="/api")
+app.include_router(router, prefix="/api")

@@ -39,14 +39,24 @@ class User(BaseModel):
 
     username = Column(TEXT, unique=True, nullable=False)
 
-    weight = Column(Float, nullable=True, comment='体重（kg）')
+    weight = Column(Float, nullable=False, comment='体重（kg）')
 
     # 部位別スコア
-    score_chest = Column(Float, nullable=True, comment='胸スコア')
-    score_back = Column(Float, nullable=True, comment='背中スコア')
-    score_shoulder = Column(Float, nullable=True, comment='肩スコア')
-    score_arm = Column(Float, nullable=True, comment='腕スコア')
-    score_leg = Column(Float, nullable=True, comment='足スコア')
+    # score_chest = Column(Float, nullable=True, comment='胸スコア')
+    # score_back = Column(Float, nullable=True, comment='背中スコア')
+    # score_shoulder = Column(Float, nullable=True, comment='肩スコア')
+    # score_arm = Column(Float, nullable=True, comment='腕スコア')
+    # score_leg = Column(Float, nullable=True, comment='足スコア')
+    score_upperpecs = Column(Float, nullable=True, comment='大胸筋上部スコア')
+    score_lowerpecs = Column(Float, nullable=True, comment='大胸筋下部スコア')
+    score_lats = Column(Float, nullable=True, comment='広背筋スコア')
+    score_traps = Column(Float, nullable=True, comment='僧帽筋スコア')
+    score_anteriordelts = Column(Float, nullable=True, comment='三角筋前部スコア')
+    score_lateraldelts = Column(Float, nullable=True, comment='三角筋側部スコア')
+    score_biceps = Column(Float, nullable=True, comment='上腕二頭筋スコア')
+    score_traceps = Column(Float, nullable=True, comment='上腕三頭筋スコア')
+    score_quadriceps = Column(Float, nullable=True, comment='大腿四頭筋スコア')
+    score_hamstrings = Column(Float, nullable=True, comment='ハムストリングススコア')
 
     # トレーニング履歴とのリレーション
     train_history = relationship("Train_History", back_populates="user", cascade="all, delete-orphan")

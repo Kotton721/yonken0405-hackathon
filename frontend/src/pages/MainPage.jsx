@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {toggleState} from '../utils/toggleState'
 
-function MuscleList() {
+function MuscleList({ date,userId,onSave, onClose }) {
   const [muscles, setMuscles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,6 +10,8 @@ function MuscleList() {
   const [trainingOpenStates, setTrainingOpenStates] = useState({}); // トレーニングのトグル状態
   const [trainingRecords, setTrainingRecords] = useState({}); // 保存された記録
   const [currentInput, setCurrentInput] = useState({}); // 現在の入力値
+
+  const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
 
   useEffect(() => {
     const fetchMuscles = async () => {
@@ -56,21 +58,21 @@ const saveTrainingData = async (trainingId) => {
     const timestamp = new Date().toISOString(); // タイムスタンプを取得
 
     const trainingData = {
-      training_id: trainingId,
-      weight: data.weight,
-      reps: data.reps,
-      timestamp: timestamp,
+      user_id: userId,  // ユーザーID
+      training_date: timestamp,  // タイムスタンプ (トレーニング日)
+      training_id: trainingId,  // トレーニングID
+      training_weight: data.weight,  // 重量
+      training_count: data.reps,  // 回数
     };
+
 
     try {
       // FastAPIにPOSTリクエストを送信
-      const response = await axios.post("http://localhost:8000/save-training", trainingData);
+      const response = await axios.post(`http://localhost:8000/api/users/${userId}/train-history`, trainingData);
+
 
       // サーバーからのレスポンスを確認
       console.log("サーバーからのレスポンス:", response.data);
-
-      // メッセージを画面に表示する
-      alert(response.data.message); // または setState(response.data.message)
 
 
       // トレーニングデータを更新
@@ -108,7 +110,7 @@ const saveTrainingData = async (trainingId) => {
 
   return (
     <div>
-      <h1>筋部位とトレーニング一覧</h1>
+      <h1>{formattedDate}</h1>
       {muscles.map((muscle) => (
         <div key={muscle.id} style={{ marginBottom: '20px' }}>
           <h2

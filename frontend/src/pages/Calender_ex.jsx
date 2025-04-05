@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../App.css";
 import axios from "axios";
+import MuscleList from "./MainPage";
 
 // 筋トレメニューのデータ
 const workoutCategories = {
@@ -25,6 +26,7 @@ const WorkoutCalendar = () => {
   const [username, setUsername] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [userId, setUserId] = useState(null);
 
 
   // ローカルストレージからデータをロード
@@ -123,27 +125,22 @@ const WorkoutCalendar = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-        username: username,
-        weight: weight ? parseFloat(weight) : null, // 文字列を数値に変換
-      };
-      try {
-        console.log("リクエスト送信開始:", payload); // 送信データ確認
-        const response = await axios.post("http://localhost:8000/api/users", payload, {
-            headers: { "Content-Type": "application/json" },
-            timeout: 5000,
-        });
-        console.log("レスポンス受信:", response.data); // 成功時のデータ確認
-        setSuccess(`ユーザー ${response.data.username} が作成されました！`);
-        setError(null);
-      } catch (error) {
-        console.error("通信エラー:", {
-          status: error.response?.status, // ステータスコード
-          data: error.response?.data,     // エラー詳細
-          message: error.message,         // 一般的なエラーメッセージ
-        });
-        setError(error.response?.data?.detail || "エラーが発生しました");
-        setSuccess(null);
-      }
+      username: username,
+      weight: weight ? parseFloat(weight) : null, // 体重が入力されていない場合は null
+    };
+
+    try {
+      const response = await axios.post("http://localhost:8000/api/users", payload, {
+        headers: { "Content-Type": "application/json" },
+        timeout: 5000,
+      });
+      setUserId(response.data.id);  // ユーザーIDを設定
+      setSuccess(`ユーザー ${response.data.username} が作成されました！`);
+      setError(null);
+    } catch (error) {
+      setError(error.response?.data?.detail || "エラーが発生しました");
+      setSuccess(null);
+    }
   };
 
   return (
@@ -218,79 +215,13 @@ const WorkoutCalendar = () => {
       </div>
 
       {selectedDate && (
-        <div className="workout-form">
-          <h2>{`${selectedDate.getFullYear()}年${
-            selectedDate.getMonth() + 1
-          }月${selectedDate.getDate()}日`}</h2>
-          <div>
-            <label>カテゴリーを選択:</label>
-            <select
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="form-select"
-            >
-              <option value="">選択してください</option>
-              {Object.keys(workoutCategories).map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {selectedCategory && (
-            <div>
-              <label>トレーニングを選択:</label>
-              <select
-                onChange={(e) => setSelectedExercise(e.target.value)}
-                className="form-select"
-              >
-                <option value="">選択してください</option>
-                {workoutCategories[selectedCategory].map((exercise) => (
-                  <option key={exercise} value={exercise}>
-                    {exercise}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className="reps-sets">
-            <input
-              type="number"
-              placeholder="重量"
-              value={reps}
-              onChange={(e) => setReps(e.target.value)}
-              className="form-input"
-            />
-            <input
-              type="number"
-              placeholder="セット数"
-              value={sets}
-              onChange={(e) => setSets(e.target.value)}
-              className="form-input"
-            />
-          </div>
-
-          <button
-            onClick={() => handleWorkoutSubmit(selectedDate)}
-            className="submit-button"
-          >
-            記録する
-          </button>
-        </div>
-      )}
-
-      <div className="workout-log">
-        <h2>記録一覧</h2>
-        {Object.keys(workouts).map((key) => (
-          <div key={key} className="log-item">
-            <p>
-              {key}: {workouts[key].exercise}, {workouts[key].reps}回 x{" "}
-              {workouts[key].sets}セット
-            </p>
-          </div>
-        ))}
-      </div>
+  <MuscleList
+    date={selectedDate}
+    userId={userId}  // ユーザーIDを渡す
+    onSave={(date) => handleWorkoutSubmit(date)}
+    onClose={() => setSelectedDate(null)}
+  />
+  )}
 
       <div className="recommended-workout">
         <button onClick={getRecommendedWorkout} className="recommend-button">

@@ -14,10 +14,20 @@ conn = psycopg2.connect(
     password=password
 )
 
-# SQLクエリ: ユーザー情報を取得
+# SQLクエリ: ユーザー情報とそのトレーニング履歴を取得
 query = """
-SELECT id, username, weight, score_chest, score_back, score_shoulder, score_arm, score_leg
-FROM users;
+SELECT
+    u.id AS user_id,
+    u.username,
+    u.weight,
+    th.training_date,
+    th.training_id,
+    th.training_weight,
+    th.training_count
+FROM
+    users u
+JOIN
+    train_history th ON u.id = th.user_id;
 """
 
 # カーソルを作成
@@ -30,17 +40,17 @@ cursor.execute(query)
 rows = cursor.fetchall()
 
 # 結果を表示
-print("ユーザー情報:")
+print("ユーザーとトレーニング履歴:")
 for row in rows:
     user_id = row[0]
     username = row[1]
     weight = row[2]
-    score_chest = row[3]
-    score_back = row[4]
-    score_shoulder = row[5]
-    score_arm = row[6]
-    score_leg = row[7]
-    print(f"User ID: {user_id}, Username: {username}, Weight: {weight}, Chest Score: {score_chest}, Back Score: {score_back}, Shoulder Score: {score_shoulder}, Arm Score: {score_arm}, Leg Score: {score_leg}")
+    training_date = row[3]
+    training_id = row[4]  # training_id を取得
+    training_weight = row[5]
+    training_count = row[6]
+    print(f"User ID: {user_id}, Username: {username}, Weight: {weight}, Training Date: {training_date}, "
+          f"Training ID: {training_id}, Weight: {training_weight}, Reps: {training_count}")
 
 # 接続を閉じる
 cursor.close()

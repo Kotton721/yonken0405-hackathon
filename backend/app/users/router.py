@@ -83,16 +83,30 @@ def add_train_history(
     history: TrainHistoryCreate,
     db: Session = Depends(get_db)
 ):
+    # リクエストを受け取ったことをログに記録
+    logger.info(f"Received request to add training history for user ID {user_id} with data: {history.dict()}")
+
+    # ユーザーが存在するか確認
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
+        logger.error(f"User with ID {user_id} not found.")
         raise HTTPException(status_code=404, detail="User not found")
 
+    logger.info(f"Adding new training history for user ID {user_id}: {history.dict()}")
+
+    # 新しいトレーニング履歴を作成
     new_history = Train_History(user_id=user_id, **history.dict())
     db.add(new_history)
-    db.commit()
-    db.refresh(new_history)
-    return new_history
 
+    try:
+        db.commit()
+        db.refresh(new_history)
+        logger.info(f"Training history for user ID {user_id} added successfully.")
+        return new_history
+    except Exception as e:
+        logger.error(f"Error while saving training history for user ID {user_id}: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Failed to save training history")
 # トレーニング履歴取得
 @router.get("/users/{user_id}/train-history", response_model=List[TrainHistoryRead])
 def get_train_history(user_id: int, db: Session = Depends(get_db)):

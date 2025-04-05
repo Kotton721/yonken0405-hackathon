@@ -10,6 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MuscleList />} />  {}
         {/* <Route path="/" element={<Calender />} />  {} */}
+        {/* <Route path="/" element={<MainList />} />  {} */}
       </Routes>
   </Router>
   );

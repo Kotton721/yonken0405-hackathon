@@ -1,6 +1,5 @@
-export const toggleState = (setState, id) => {
-    setState((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
+
+export const toggleState = (prevState, id) => ({
+  ...prevState,
+  [id]: !prevState[id],
+});

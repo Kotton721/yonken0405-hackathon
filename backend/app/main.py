@@ -9,11 +9,11 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List
-
+from datetime import datetime, timezone
 #データベース系
 from app.database import get_db
-from app.db_models import TrainingName,MajorMuscle
-from app.schema import TrainingNameSchema,MajorMuscleSchema,TrainingData  
+from app.db_models import TrainingName,MajorMuscle,TrainingLog
+from app.schema import TrainingNameSchema,MajorMuscleSchema,TrainingData
 
 # ロギング設定
 logging.basicConfig(filename='app.log', level=logging.INFO)  # ログレベルはINFOに設定
@@ -56,15 +56,22 @@ def get_all_major_muscles(db: Session = Depends(get_db)):
     return major_muscles
 
 @app.post("/save-training")
-async def save_training(data: TrainingData):
+async def save_training(data: TrainingData, db: Session = Depends(get_db)):
     logger.info("Reactからの'/save-training'リクエストを受信")
     try:
-        # 受け取ったデータをログに記録
         logger.debug(f"受け取ったデータ: {data.dict()}")
-        print(f"受け取ったデータ: {data.dict()}")  # コンソールに出力
 
-        # 例: in-memory storageにデータを追加
-        training_records.append(data.dict())
+         # データベースにレコードを追加
+        new_log = TrainingLog(
+            training_id=data.training_id,
+            weight=data.weight,
+            reps=data.reps,
+            timestamp = datetime.fromisoformat(data.timestamp.rstrip('Z')).replace(tzinfo=timezone.utc)
+        )
+        db.add(new_log)
+        db.commit()
+        db.refresh(new_log)
+
         return {"message": "Training data saved successfully"}
     except Exception as e:
         logger.error(f"Error saving training data: {str(e)}")

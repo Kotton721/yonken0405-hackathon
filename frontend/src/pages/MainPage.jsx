@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {toggleState} from '../utils/toggleState'
 
 function MuscleList() {
   const [muscles, setMuscles] = useState([]);
@@ -25,20 +26,14 @@ function MuscleList() {
     fetchMuscles();
   }, []);
 
-  // 筋肉のトグル
+   // 筋肉のトグル
   const toggleMuscle = (muscleId) => {
-    setOpenStates((prev) => ({
-      ...prev,
-      [muscleId]: !prev[muscleId],
-    }));
+    setOpenStates((prev) => toggleState(prev, muscleId));
   };
 
   // トレーニングのトグル
   const toggleTraining = (trainingId) => {
-    setTrainingOpenStates((prev) => ({
-      ...prev,
-      [trainingId]: !prev[trainingId],
-    }));
+    setTrainingOpenStates((prev) => toggleState(prev, trainingId));
   };
 
   // 入力値の変更
@@ -69,20 +64,14 @@ const saveTrainingData = async (trainingId) => {
 
     try {
       // FastAPIにPOSTリクエストを送信
-      const response = await fetch("http://localhost:8000/save-training", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(trainingData),
-      });
+      const response = await axios.post("http://localhost:8000/save-training", trainingData);
 
-      if (!response.ok) {
-        throw new Error("Failed to save training data");
-      }
+      // サーバーからのレスポンスを確認
+      console.log("サーバーからのレスポンス:", response.data);
 
-      const result = await response.json();
-      console.log(result.message); // トレーニングデータが正常に保存されました
+      // メッセージを画面に表示する
+      alert(response.data.message); // または setState(response.data.message)
+
 
       // トレーニングデータを更新
       setTrainingRecords((prev) => ({
@@ -99,7 +88,8 @@ const saveTrainingData = async (trainingId) => {
         [trainingId]: { weight: '', reps: '' },
       }));
     } catch (error) {
-      console.error("Error saving training data:", error);
+      console.error("送信エラー:", error);
+      alert("データの保存に失敗しました。");
     }
   }
 };
@@ -153,7 +143,7 @@ const saveTrainingData = async (trainingId) => {
                             <ul>
                               {trainingRecords[training.id].map((record, index) => (
                                 <li key={index}>
-                                  重さ: {record.weight || '未設定'}kg, 
+                                  重さ: {record.weight || '未設定'}kg,
                                   回数: {record.reps || '未設定'},
                                   タイムスタンプ: {new Date(record.timestamp).toLocaleString('ja-JP')}
                                 </li>

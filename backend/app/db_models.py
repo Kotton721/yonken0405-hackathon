@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, String, ForeignKey,Float
+from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey,String
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 #ローカルでpythonとして実行するときはapp.が必要がないが，uvicornで実行するときベースのdirectoryがapp/appの上の階層
 
->>>>>>> f252e58f4c8a5e0c2b266c82038e6538cda3f921
-from database import Base
+# from database import Base
+from app.database import Base
 
 # 大筋群
 class MajorMuscle(Base):
@@ -56,6 +57,9 @@ class TrainingName(Base):
 
     weight_ratios = relationship("WeightRatio", back_populates="training_name")
 
+    logs = relationship("TrainingLog", back_populates="training")
+
+
 
 # トレーニングとスコアを保持するテーブル
 class TrainingScore(Base):
@@ -79,5 +83,15 @@ class WeightRatio(Base):
 
     training_name = relationship("TrainingName", back_populates="weight_ratios")
 
+class TrainingLog(Base):
+    __tablename__ = "training_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    training_id = Column(Integer, ForeignKey("training_names.id"), nullable=False, index=True)
+    weight = Column(Float, nullable=False)
+    reps = Column(Integer, nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    training = relationship("TrainingName", back_populates="logs")
 
 

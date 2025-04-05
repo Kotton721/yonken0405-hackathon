@@ -27,4 +27,7 @@ class TrainingData(BaseModel):
     training_id: int
     weight: float
     reps: int
-    timestamp: datetime
+    timestamp: str
+
+    class Config:
+        orm_mode = True

@@ -155,7 +155,7 @@ def add_data():
             else:
                 print(f"Training name not found: {training_name}")
 
-        
+
         try:
             db.add_all(training_scores)
             db.commit()

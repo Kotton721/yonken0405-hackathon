@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from app.database import get_db
 from app.db_models import TrainingName,MajorMuscle,TrainingLog
 from app.schema import TrainingNameSchema,MajorMuscleSchema,TrainingData
-
+from users.router import router as users_router
 # ロギング設定
 logging.basicConfig(filename='app.log', level=logging.INFO)  # ログレベルはINFOに設定
 logger = logging.getLogger(__name__)  # ロガーを作成

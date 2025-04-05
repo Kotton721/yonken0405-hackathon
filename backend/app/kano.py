@@ -1,6 +1,7 @@
 # kano.py
 from sqlalchemy.orm import Session
 from db_models import TrainingName, TrainingScore
+from db_models import MinorMuscle
 
 minor_muscles = [
     {"name": "大胸筋上部", "major_muscle_id": "chest_id"},

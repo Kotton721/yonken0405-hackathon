@@ -1,3 +1,4 @@
+# データベースの中身消す用
 from database import SessionLocal
 from kano_db_models import DailyMuscleSummary
 

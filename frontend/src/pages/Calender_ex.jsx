@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../App.css";
+import axios from "axios";
 
 // 筋トレメニューのデータ
 const workoutCategories = {
@@ -21,7 +22,9 @@ const WorkoutCalendar = () => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [weight, setWeight] = useState(""); // 体重
   const [recommendedWorkout, setRecommendedWorkout] = useState(""); // おすすめメニュー
-  const [userid, setUserid] = useState(""); // ユーザーID用の状態
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
 
   // ローカルストレージからデータをロード
@@ -117,64 +120,60 @@ const WorkoutCalendar = () => {
   };
 
   // 送信処理
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const payload = {
-      weight: weight,
-      user_id: userid, // ユーザーIDを含めて送信
-    };
-
-    // FastAPI にデータを送信
-    try {
-        const response = await fetch("http://localhost:8000/users", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+        username: username,
+        weight: weight ? parseFloat(weight) : null, // 文字列を数値に変換
+      };
+      try {
+        console.log("リクエスト送信開始:", payload); // 送信データ確認
+        const response = await axios.post("http://localhost:8000/api/users", payload, {
+            headers: { "Content-Type": "application/json" },
+            timeout: 5000,
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("API error:", errorData);
-          throw new Error("Failed to update weight");
-        }
-
-        const data = await response.json();
-        console.log("Response:", data);
+        console.log("レスポンス受信:", response.data); // 成功時のデータ確認
+        setSuccess(`ユーザー ${response.data.username} が作成されました！`);
+        setError(null);
       } catch (error) {
-        console.error("Error:", error);
+        console.error("通信エラー:", {
+          status: error.response?.status, // ステータスコード
+          data: error.response?.data,     // エラー詳細
+          message: error.message,         // 一般的なエラーメッセージ
+        });
+        setError(error.response?.data?.detail || "エラーが発生しました");
+        setSuccess(null);
       }
-
   };
 
   return (
     <div className="calendar-container">
       <h1>筋トレカレンダー</h1>
-
       <div>
-      <div className="weight-input">
-        <label>本日の体重:</label>
-        <input
-          type="number"
-          value={weight}
-          onChange={handleWeightChange}
-          placeholder="体重を入力"
-          className="weight-input-field"
-        />
-      </div>
-
-      <div className="user-id-input">
-        <label>ユーザーID:</label>
-        <input
-          type="number"
-          value={userid}
-          onChange={handleUseridChange}
-          placeholder="ユーザーIDを入力"
-          className="user-id-input-field"
-        />
-      </div>
-
-      <button onClick={handleSubmit}>送信</button>
+      <h1>ユーザー作成</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>ユーザー名:</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="ユーザー名を入力"
+          />
+        </div>
+        <div>
+          <label>体重（任意）:</label>
+          <input
+            type="number"
+            value={weight}
+            onChange={(e) => setWeight(e.target.value)}
+            placeholder="体重を入力"
+          />
+        </div>
+        <button type="submit">作成</button>
+      </form>
+      {success && <p style={{ color: "green" }}>{success}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
 
       <div className="month-navigation">

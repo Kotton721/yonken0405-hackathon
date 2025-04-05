@@ -1,1 +1,2 @@
-* text=auto
+# 全てのファイルでLF（Unix改行）を使用するように設定
+* text=auto eol=lf

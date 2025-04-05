@@ -1,5 +1,6 @@
 # https://qiita.com/Butterthon/items/a55daa0e7f168fee7ef0
-from sqlalchemy import BOOLEAN, Column, Integer, TEXT, TIMESTAMP, VARCHAR, Float
+from sqlalchemy import BOOLEAN, Column, Integer, TEXT, TIMESTAMP, VARCHAR, Float, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.sql.functions import current_timestamp
 
@@ -31,22 +32,12 @@ class BaseModel(Base):
         comment='最終更新日時',
     )
 
-    @declared_attr
-    def __mapper_args__(cls):
-        """ デフォルトのオーダリングは主キーの昇順
-        
-        降順にしたい場合
-        from sqlalchemy import desc
-        # return {'order_by': desc('id')}
-        """
-        return {'order_by': 'id'}
     
-    
+
 class User(BaseModel):
     __tablename__ = 'users'
 
     username = Column(TEXT, unique=True, nullable=False)
-    password = Column(VARCHAR(128), nullable=False)
 
     weight = Column(Float, nullable=True, comment='体重（kg）')
 
@@ -56,3 +47,19 @@ class User(BaseModel):
     score_shoulder = Column(Float, nullable=True, comment='肩スコア')
     score_arm = Column(Float, nullable=True, comment='腕スコア')
     score_leg = Column(Float, nullable=True, comment='足スコア')
+
+    # トレーニング履歴とのリレーション
+    train_history = relationship("Train_History", back_populates="user", cascade="all, delete-orphan")
+
+
+class Train_History(BaseModel):
+    __tablename__ = 'train_history'
+
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment='ユーザーID')
+    training_date = Column(DateTime(timezone=True), nullable=False, comment='トレーニング日')
+    training_id = Column(Integer, nullable=False, comment='トレーニングID')
+    training_weight = Column(Integer, nullable=False, comment='重量')
+    training_count = Column(Integer, nullable=False, comment='回数')
+
+    # Userとのリレーション
+    user = relationship("User", back_populates="train_history")

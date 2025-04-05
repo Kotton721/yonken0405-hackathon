@@ -76,3 +76,5 @@ async def save_training(data: TrainingData, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error saving training data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred while saving data: {str(e)}")
+# users関連のAPIルーターを登録
+app.include_router(users_router, prefix="/api")

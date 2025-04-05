@@ -13,15 +13,15 @@ class TrainingRecord(Base):
     training_date = Column(Date, nullable=False, unique=True)  # トレーニングの日付（ユニーク）
 
     # 10種類のスコア（例として 'score_1', 'score_2'... としている）
-    score_1 = Column(Float, nullable=True)
-    score_2 = Column(Float, nullable=True)
-    score_3 = Column(Float, nullable=True)
+    scorlumn(Float, nullable=True)
     score_4 = Column(Float, nullable=True)
     score_5 = Column(Float, nullable=True)
     score_6 = Column(Float, nullable=True)
     score_7 = Column(Float, nullable=True)
     score_8 = Column(Float, nullable=True)
-    score_9 = Column(Float, nullable=True)
+    score_9 = Column(Floe_1 = Column(Float, nullable=True)
+    score_2 = Column(Float, nullable=True)
+    score_3 = Coat, nullable=True)
     score_10 = Column(Float, nullable=True)
 
     # 外部キーで関連付け

@@ -18,6 +18,7 @@ from app.schema import TrainingNameSchema,MajorMuscleSchema,TrainingData
 from app.users.router import router
 from app.users.schema import UserRead,UserCreate
 
+
 # ロギング設定
 logging.basicConfig(filename='app.log', level=logging.INFO)  # ログレベルはINFOに設定
 logger = logging.getLogger(__name__)  # ロガーを作成

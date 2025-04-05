@@ -1,5 +1,6 @@
 from database import SessionLocal
 from kano import calculate_total_training_score, save_daily_summary
+from db_models import MinorMuscle
 
 def run_7_days():
     db = SessionLocal()

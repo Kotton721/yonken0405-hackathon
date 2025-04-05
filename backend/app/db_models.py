@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 
 #ローカルでpythonとして実行するときはapp.が必要がないが，uvicornで実行するときベースのdirectoryがapp/appの上の階層
 
->>>>>>> f252e58f4c8a5e0c2b266c82038e6538cda3f921
 from database import Base
 
 # 大筋群

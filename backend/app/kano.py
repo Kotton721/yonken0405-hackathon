@@ -1,6 +1,19 @@
 # kano.py
 from sqlalchemy.orm import Session
-from db_models import TrainingName, TrainingScore, MinorMuscle
+from db_models import TrainingName, TrainingScore
+
+minor_muscles = [
+    {"name": "大胸筋上部", "major_muscle_id": "chest_id"},
+    {"name": "大胸筋下部", "major_muscle_id": "chest_id"},
+    {"name": "広背筋", "major_muscle_id": "back_id"},
+    {"name": "僧帽筋", "major_muscle_id": "back_id"},
+    {"name": "三角筋前部", "major_muscle_id": "shoulder_id"},
+    {"name": "三角筋側部", "major_muscle_id": "shoulder_id"},
+    {"name": "上腕二頭筋", "major_muscle_id": "arm_id"},
+    {"name": "上腕三頭筋", "major_muscle_id": "arm_id"},
+    {"name": "大腿四頭筋", "major_muscle_id": "leg_id"},
+    {"name": "ハムストリング", "major_muscle_id": "leg_id"},
+]
 
 # スコアを計算する関数
 def calculate_total_training_score(
@@ -36,6 +49,7 @@ def calculate_total_training_score(
                 total_result[muscle.name] = adjusted_score
 
     return total_result
+
 
 
 from kano_db_models import DailyMuscleSummary

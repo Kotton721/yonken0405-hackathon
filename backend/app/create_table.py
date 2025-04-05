@@ -4,6 +4,7 @@ from sqlalchemy import text
 from database import engine, Base, SessionLocal
 from db_models import MajorMuscle, MinorMuscle,TrainingName,TrainingScore,TrainingType,WeightRatio
 
+from kano_db_models import DailyMuscleSummary  # 追加
 # データ追加
 def add_data():
     db = SessionLocal()

@@ -39,7 +39,7 @@ class User(BaseModel):
 
     username = Column(TEXT, unique=True, nullable=False)
 
-    weight = Column(Float, nullable=False, comment='体重（kg）')
+    weight = Column(Float, nullable=True, comment='体重（kg）')
 
     # 部位別スコア
     # score_chest = Column(Float, nullable=True, comment='胸スコア')

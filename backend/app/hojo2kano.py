@@ -1,11 +1,14 @@
 from sqlalchemy.orm import Session
-from db_models import TrainingName, TrainingScore
-from db_models import MinorMuscle
-from kano_db_models import DailyMuscleSummary
-from database import SessionLocal
+from app.db_models import TrainingName, TrainingScore
+from app.db_models import MinorMuscle
+from app.kano_db_models import DailyMuscleSummary
+from app.database import SessionLocal
 from collections import defaultdict
 from sqlalchemy import func
-from users.models import Train_History
+from app.users.models import Train_History, User
+from datetime import date, datetime, timedelta
+from app.users.router import router
+from app.kano_delete import delete_all_daily_data
 
 
 minor_muscles = [
@@ -39,7 +42,27 @@ def calculate_total_training_score(
             print(f"種目「{name}」が見つかりません")
             continue
 
+        user_id = 44  # ユーザーID（必要に応じて変更）
+
         # スコア取得
+        histories = db.query(Train_History).filter(
+            Train_History.user_id == user_id,
+            Train_History.training_id == training.id,
+            Train_History.training_date >= datetime.now() - timedelta(days=7)  # 過去7日間
+        ).all()
+
+        # ユーザーの履歴が存在しない場合はスキップ
+        if not histories:
+            print(f"ユーザーID {user_id} のトレーニング履歴がありません")
+            continue
+
+        # トレーニング履歴の表示
+        for history in histories:
+            print(f"User ID: {history.user_id}, Training ID: {history.training_id}, "
+                  f"Training Date: {history.training_date}, Weight: {history.training_weight}, "
+                  f"Count: {history.training_count}")
+
+        # スコア計算
         scores = db.query(TrainingScore).filter_by(training_name_id=training.id).all()
         for score in scores:
             muscle = db.query(MinorMuscle).filter_by(id=score.minor_muscle_id).first()
@@ -58,6 +81,9 @@ def calculate_total_training_score(
 
 # スコアを保存する関数
 def save_daily_summary(db: Session, daily_data: dict):
+    day_labels = list(daily_data.keys())
+    db.query(DailyMuscleSummary).filter(DailyMuscleSummary.day_label.in_(day_labels)).delete(synchronize_session=False)
+
     records = []
     for day_label, muscle_scores in daily_data.items():
         for muscle_name, score in muscle_scores.items():
@@ -72,19 +98,26 @@ def save_daily_summary(db: Session, daily_data: dict):
     db.add_all(records)
     db.commit()
     print("日別筋肉スコアを保存しました")
-    
-def main():
+
+def hojo2kano(user_id: int):
+
     db = SessionLocal()
     try:
         daily_data = {}
         # defaultdictでリストの初期化を簡単に
         day_inputs = defaultdict(list)
 
-        # Train_Historyから日付・トレーニング名・セット数相当のデータをまとめて取得
+        # 現在の日付を取得し、過去7日間のデータを取得する
+        current_date = datetime.now()
+        seven_days_ago = current_date - timedelta(days=7)
+
+        # Train_Historyから過去7日間のデータをまとめて取得
         history_records = db.query(
             func.date(Train_History.training_date).label("training_day"),
             Train_History.training_id,
             func.count().label("sets")
+        ).filter(
+            Train_History.training_date >= seven_days_ago
         ).group_by(
             func.date(Train_History.training_date),
             Train_History.training_id
@@ -92,21 +125,39 @@ def main():
 
         # トレーニングID → 名前の変換（仮に辞書を使う例）
         training_name_map = {
-            1: "チェストプレス",
-            2: "ダンベルフライ",
-            3: "ベンチプレス",
-            4: "ショルダープレス",
-            5: "バイセップスカール",
-            6: "スカルクラッシャー（ライイングトライセプスエクステンション）",
-            7: "懸垂（プルアップ）",
-            8: "ラットプルダウン",
-            9: "スクワット",
-            10: "レッグカール",
-            11: "ブルガリアンスクワット",
-            12: "カーフレイズ",
-            13: "パイクプッシュアップ",
-            14: "フレンチプレス"
-        }
+                1: "チェストプレス",
+                2: "ペクトラルフライ",
+                3: "ベンチプレス",
+                4: "インクラインベンチプレス",
+                5: "ダンベルフライ",
+                6: "腕立て伏せ（プッシュアップ）",
+                7: "ディップス",
+                8: "ラットプルダウン",
+                9: "シーテッドローイング",
+                10: "デッドリフト",
+                11: "ワンハンドダンベルローイング",
+                12: "懸垂（プルアップ）",
+                13: "逆手懸垂（アンダーグリップ・チンアップ）",
+                14: "ショルダープレス",
+                15: "ショルダープレスマシン",
+                16: "サイドレイズ",
+                17: "パイクプッシュアップ",
+                18: "トライセプスプレスダウン",
+                19: "バイセップスカール",
+                20: "バーベルカール",
+                21: "ダンベルカール",
+                22: "ハンマーカール",
+                23: "フレンチプレス",
+                24: "スカルクラッシャー（ライイングトライセプスエクステンション）",
+                25: "レッグプレス",
+                26: "レッグエクステンション",
+                27: "レッグカール",
+                28: "カーフレイズ",
+                29: "スクワット",
+                30: "ブルガリアンスクワット",
+                31: "スプリットスクワット"
+            }
+
 
         # 日別にinputs形式に整える
         for record in history_records:
@@ -128,10 +179,12 @@ def main():
         save_daily_summary(db, daily_data)
     finally:
         db.close()
-        
+
 
 if __name__ == "__main__":
-    main()
+    delete_all_daily_data()
+    hojo2kano()
+
 
 
 # def main()

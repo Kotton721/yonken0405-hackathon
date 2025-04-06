@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, Float, String, Date, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import date
-from database import Base  # ← これが必要！
+from app.database import Base  # ← これが必要！
 
 
 class DailyMuscleSummary(Base):

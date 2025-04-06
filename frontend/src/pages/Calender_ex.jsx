@@ -203,13 +203,13 @@ const WorkoutCalendar = () => {
         {userId && <p>現在のユーザーID: {userId}</p>}
 
         {/* デバッグ情報表示 */}
-        <div style={{ marginTop: "20px", background: "#f0f0f0", padding: "10px" }}>
+        {/* <div style={{ marginTop: "20px", background: "#f0f0f0", padding: "10px" }}>
           <h3>デバッグ情報</h3>
           {sentData && <p>送信データ: {sentData}</p>}
           {responseData && <p>レスポンス: {responseData}</p>}
           {responseId !== null && <p>レスポンスのID: {responseId}</p>}
           {errorDetail && <p>エラー詳細: {errorDetail}</p>}
-        </div>
+        </div> */}
       </div>
 
 

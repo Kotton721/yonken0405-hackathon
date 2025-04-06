@@ -20,6 +20,10 @@ from app.users.models import User
 from app.users.schema import UserRead,UserCreate
 
 from app.kano_q import QLearningTrainingSelection
+from app.hojo2kano import hojo2kano
+from app.kano_weighted_summary import get_weighted_muscle_scores
+from app.kano_delete import delete_all_daily_data
+
 
 minor_muscles = [
     {"name": "大胸筋上部", "major_muscle_id": "chest_id"},
@@ -132,8 +136,11 @@ async def save_training(data: TrainingData, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"An error occurred while saving data: {str(e)}")
 @app.get("/recommended-workout")
 def get_recommended_workout():
-    logger
-    current_scores = [0.0] * len(minor_muscles)  # 仮の現在のスコア
+    delete_all_daily_data()
+    hojo2kano()
+
+    muscle_score_dict = get_weighted_muscle_scores()
+    current_scores = [muscle_score_dict.get(m["name"], 0.0) for m in minor_muscles]
     target_scores = [150.0] * len(minor_muscles)  # 仮の目標スコア
 
     top_5_actions, _, _ = q_learning.q_learning_training_selection(current_scores, target_scores)

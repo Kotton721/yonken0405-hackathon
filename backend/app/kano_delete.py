@@ -1,6 +1,6 @@
 # データベースの中身消す用
-from database import SessionLocal
-from kano_db_models import DailyMuscleSummary
+from app.database import SessionLocal
+from app.kano_db_models import DailyMuscleSummary
 
 def delete_all_daily_data():
     db = SessionLocal()

@@ -1,5 +1,5 @@
-from database import SessionLocal
-from kano_db_models import DailyMuscleSummary
+from app.database import SessionLocal
+from app.kano_db_models import DailyMuscleSummary
 from collections import defaultdict
 
 # 重み付きで集計

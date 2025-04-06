@@ -63,17 +63,28 @@ const WorkoutCalendar = () => {
   };
 
   // 今日のおすすめメニューを選ぶロジック（例:ランダムで選ぶ）
-  const getRecommendedWorkout = () => {
-    const categories = Object.keys(workoutCategories);
-    const randomCategory =
-      categories[Math.floor(Math.random() * categories.length)];
-    const exercises = workoutCategories[randomCategory];
-    const randomExercise =
-      exercises[Math.floor(Math.random() * exercises.length)];
-    setRecommendedWorkout(
-      `今日のおすすめ: ${randomCategory} - ${randomExercise}`
-    );
+
+
+  const getRecommendedWorkout = async () => {
+    try {
+      // バックエンドからおすすめトレーニングを取得
+      const response = await axios.get("http://localhost:8000/recommended-workout", {
+        headers: { "Content-Type": "application/json" },
+        timeout: 10000,
+      });
+
+      // バックエンドから返ってきたデータ（例：{"recommended_workouts": [...]}）
+      const recommendedWorkouts = response.data.recommended_workouts;
+
+      // レスポンスデータを使って表示する
+      setRecommendedWorkout(`今日のおすすめ: ${recommendedWorkouts.join(', ')}`);
+
+    } catch (error) {
+      console.error("エラーが発生しました", error);
+      setRecommendedWorkout("おすすめトレーニングの取得に失敗しました");
+    }
   };
+
 
   // 曜日のリスト
   const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
@@ -155,6 +166,7 @@ const WorkoutCalendar = () => {
       setSuccess(null);
     }
   };
+
 
   return (
     <div className="calendar-container">

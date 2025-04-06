@@ -24,8 +24,10 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     # ユーザー名が既に存在するか確認
     existing_user = db.query(User).filter(User.username == user.username).first()
     if existing_user:
-        logger.warning(f"ユーザー作成失敗: username='{user.username}' は既に存在します")
-        raise HTTPException(status_code=400, detail="Username already exists")
+        logger.info(f"ユーザーが既に存在します: username='{user.username}'")
+        # ユーザーがすでに存在する場合、ログインとして既存のユーザーを返す
+
+        return existing_user
 
     try:
         # ユーザーを作成
@@ -33,7 +35,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
         db.add(db_user)
         db.commit()  # コミットを実行してデータベースに保存
         db.refresh(db_user)  # 新しく作成したユーザーをリフレッシュ
-
+        check_user = db.query(User).filter(User.id == db_user.id).first()
+        logger.info(f"データベースに保存されたユーザー: {check_user}")
         logger.info(f"ユーザー作成成功: id={db_user.id}, username='{db_user.username}'")
         return db_user
 
@@ -75,6 +78,9 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return {"detail": "User deleted"}
+
+
+
 
 # トレーニング履歴追加
 @router.post("/users/{user_id}/train-history", response_model=TrainHistoryRead)

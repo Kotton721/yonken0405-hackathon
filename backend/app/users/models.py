@@ -32,7 +32,7 @@ class BaseModel(Base):
         comment='最終更新日時',
     )
 
-    
+
 
 class User(BaseModel):
     __tablename__ = 'users'

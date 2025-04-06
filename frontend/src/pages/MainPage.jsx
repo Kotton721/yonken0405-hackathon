@@ -12,6 +12,12 @@ function MuscleList({ date,userId,onSave, onClose }) {
   const [currentInput, setCurrentInput] = useState({}); // 現在の入力値
 
   const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  const queryDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+  // 日付フォーマット用関数
+  const formatDateString = (dateObj) => {
+    return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     const fetchMuscles = async () => {
@@ -27,6 +33,42 @@ function MuscleList({ date,userId,onSave, onClose }) {
     };
     fetchMuscles();
   }, []);
+
+  useEffect(() => {
+    const fetchTrainHistory = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/api/users/${userId}/train-history`);
+        const data = res.data;  // axios では `.data` に格納されている
+
+        const targetDate = formatDateString(date); // 表示したい日付（例：2025-04-06）
+
+        // 日付で絞り込む（created_at または training_date が 'YYYY-MM-DD' 形式で返ってくる前提）
+        const filtered = data.filter(record => {
+          const recordDate = record.training_date || record.created_at;
+          return recordDate?.slice(0, 10) === targetDate;
+        });
+
+        // トレーニングIDごとにまとめる
+        const grouped = {};
+        filtered.forEach((record) => {
+          if (!grouped[record.training_id]) grouped[record.training_id] = [];
+          grouped[record.training_id].push(record);
+        });
+
+        setTrainingRecords(grouped);
+      } catch (error) {
+        console.error("履歴の取得に失敗しました", error);
+        setError("履歴の取得に失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrainHistory();
+  }, [userId, date]);
+
+
+
 
    // 筋肉のトグル
   const toggleMuscle = (muscleId) => {
@@ -59,7 +101,7 @@ const saveTrainingData = async (trainingId) => {
 
     const trainingData = {
       user_id: userId,  // ユーザーID
-      training_date: timestamp,  // タイムスタンプ (トレーニング日)
+      training_date: queryDate,  // タイムスタンプ (トレーニング日)
       training_id: trainingId,  // トレーニングID
       training_weight: data.weight,  // 重量
       training_count: data.reps,  // 回数

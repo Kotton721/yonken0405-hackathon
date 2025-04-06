@@ -27,6 +27,10 @@ const WorkoutCalendar = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [sentData, setSentData] = useState(null); // 送信データ
+  const [responseData, setResponseData] = useState(null); // レスポンスデータ
+  const [responseId, setResponseId] = useState(null); // レスポンスのID
+  const [errorDetail, setErrorDetail] = useState(null); // エラー詳細
 
 
   // ローカルストレージからデータをロード
@@ -121,24 +125,33 @@ const WorkoutCalendar = () => {
     setUserid(e.target.value);
   };
 
-  // 送信処理
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
       username: username,
-      weight: weight ? parseFloat(weight) : null, // 体重が入力されていない場合は null
+      weight: weight ? parseFloat(weight) : null,
     };
+    setSentData(JSON.stringify(payload));
+    setResponseData(null);
+    setResponseId(null);
+    setErrorDetail(null);
 
     try {
       const response = await axios.post("http://localhost:8000/api/users", payload, {
         headers: { "Content-Type": "application/json" },
-        timeout: 5000,
+        timeout: 10000,
       });
-      setUserId(response.data.id);  // ユーザーIDを設定
-      setSuccess(`ユーザー ${response.data.username} が作成されました！`);
+
+      setResponseData(JSON.stringify(response.data));
+      setResponseId(response.data.id);
+      setUserId(response.data.id);
+
+      // 新規作成またはログインの判別なく、そのまま成功メッセージ
+      setSuccess(`ユーザー ${response.data.username} が処理されました！`);
       setError(null);
     } catch (error) {
       setError(error.response?.data?.detail || "エラーが発生しました");
+      setErrorDetail(JSON.stringify(error.response || error.message));
       setSuccess(null);
     }
   };
@@ -146,32 +159,47 @@ const WorkoutCalendar = () => {
   return (
     <div className="calendar-container">
       <h1>筋トレカレンダー</h1>
+
+      {/* ユーザー作成フォーム */}
       <div>
-      <h1>ユーザー作成</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>ユーザー名:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="ユーザー名を入力"
-          />
+        <h1>ユーザー作成 / ログイン</h1>
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>ユーザー名:</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="ユーザー名を入力"
+            />
+          </div>
+          <div>
+            <label>体重（任意）:</label>
+            <input
+              type="number"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              placeholder="体重を入力"
+            />
+          </div>
+          <button type="submit">作成 / ログイン</button>
+        </form>
+
+        {/* メッセージ表示 */}
+        {success && <p style={{ color: "green" }}>{success}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        {userId && <p>現在のユーザーID: {userId}</p>}
+
+        {/* デバッグ情報表示 */}
+        <div style={{ marginTop: "20px", background: "#f0f0f0", padding: "10px" }}>
+          <h3>デバッグ情報</h3>
+          {sentData && <p>送信データ: {sentData}</p>}
+          {responseData && <p>レスポンス: {responseData}</p>}
+          {responseId !== null && <p>レスポンスのID: {responseId}</p>}
+          {errorDetail && <p>エラー詳細: {errorDetail}</p>}
         </div>
-        <div>
-          <label>体重（任意）:</label>
-          <input
-            type="number"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            placeholder="体重を入力"
-          />
-        </div>
-        <button type="submit">作成</button>
-      </form>
-      {success && <p style={{ color: "green" }}>{success}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+      </div>
+
 
       <div className="month-navigation">
         <button onClick={goToPreviousMonth} className="nav-button">

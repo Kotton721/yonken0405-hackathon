@@ -83,5 +83,7 @@ async def save_training(data: TrainingData, db: Session = Depends(get_db)):
         logger.error(f"Error saving training data: {str(e)}")
         raise HTTPException(status_code=500, detail=f"An error occurred while saving data: {str(e)}")
 
+@app.get("/q_algo")
+
 # users関連のAPIルーターを登録
 app.include_router(user_router, prefix="/api")
